@@ -6,7 +6,7 @@ function App() {
         <div className="app">
             <header className="">
                 <div className="container">
-                    Salary Eaten by Inflation
+                    <h1>Real Pay</h1>
                 </div>
             </header>
             <main className="container">

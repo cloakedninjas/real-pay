@@ -14,79 +14,90 @@ import {
     Tooltip
 } from 'chart.js';
 import { chartOptions } from './chartOptions.ts';
-
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-);
-
-const regionNames = new Intl.DisplayNames(navigator.languages, {type: 'region'});
-
-const iso2Countries = [
-    'US', 'GB', 'DE', 'FR', 'FI', 'JP', 'CN', 'IN', 'BR', 'ZA', 'AU'
-];
-
-let defaultCountry = 'US';
-
-navigator.languages.some(value => {
-    const matches = value.match(/\w+-(\w+)/);
-
-    if (matches?.[1]) {
-        defaultCountry = matches[1];
-        return true;
-    }
-});
-
-const countries = iso2Countries
-    .map(code => ({
-        code,
-        name: regionNames.of(code),
-    }))
-    .filter(c => c.name);
-
-interface PayRiseInput {
-    year: string;
-    salary: string;
-}
+import { countryCodes, countryCurrency, defaultCountry } from './locales.ts';
+import { Icon } from '../Icon.tsx';
 
 export default function Calculator() {
+    ChartJS.register(
+        CategoryScale,
+        LinearScale,
+        PointElement,
+        LineElement,
+        Title,
+        Tooltip,
+        Legend
+    );
+
+    const regionNames = new Intl.DisplayNames(navigator.languages, {type: 'region'});
+    const percentageFormmater = new Intl.NumberFormat(navigator.languages, {
+        style: 'percent',
+        maximumFractionDigits: 2
+    })
+
+    let defaultCountryCode = defaultCountry;
+
+    navigator.languages.some(value => {
+        const matches = value.match(/\w+-(\w+)/);
+
+        if (matches?.[1]) {
+            defaultCountryCode = matches[1];
+            return true;
+        }
+    });
+
+    const countries = countryCodes
+        .map(code => ({
+            code,
+            name: regionNames.of(code),
+        }))
+        .filter(c => c.name);
+
     const [loading, setLoading] = React.useState(false);
     const [data, setData] = React.useState<number[] | null>(null);
     const [adjustedSalary, setAdjustedSalary] = React.useState<number[] | null>(null);
     const [years, setYears] = React.useState<number[]>([]);
-    const [selectedCountry, setSelectedCountry] = React.useState(defaultCountry);
-    const [startingSalary, setStartingSalary] = React.useState('');
+    const [selectedCountry, setSelectedCountry] = React.useState(defaultCountryCode);
+    const [startingSalary, setStartingSalary] = React.useState<number>('' as unknown as number);
     const [startingYear, setStartingYear] = React.useState('');
     const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{year: '', salary: ''}]);
-    const [isFormExpanded, setIsFormExpanded] = React.useState(true);
+    const [isRealValues, setIsRealValues] = React.useState(true);
+
+    let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
+        style: 'currency',
+        currencyDisplay: 'narrowSymbol',
+        currency: countryCurrency[selectedCountry]
+    });
 
     const changeCountry: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
+
+        currencyFormatter = new Intl.NumberFormat(navigator.languages, {
+            style: 'currency',
+            currencyDisplay: 'narrowSymbol',
+            currency: countryCurrency[selectedCountry]
+        });
     }
 
     const changeSalary: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-        setStartingSalary(e.target.value);
+        setStartingSalary(Number(e.target.value));
     }
 
     const changeYear: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         setStartingYear(e.target.value);
     }
 
+    const toggleRealValues: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+        setIsRealValues(e.target.checked);
+    }
+
     const updatePayRise = (index: number, field: keyof PayRiseInput, value: string) => {
         const newPayRises = [...payRises];
         newPayRises[index][field] = value;
         setPayRises(newPayRises);
+    }
 
-        // Add a new empty row if the last row has data
-        const lastRise = newPayRises[newPayRises.length - 1];
-        if (lastRise.year !== '' || lastRise.salary !== '') {
-            setPayRises([...newPayRises, {year: '', salary: ''}]);
-        }
+    const addPayRise = () => {
+        setPayRises([...payRises, {year: '', salary: ''}]);
     }
 
     const removePayRise = (index: number) => {
@@ -118,7 +129,7 @@ export default function Calculator() {
                     }));
 
                 const salaryData: number[] = calculateRealSalaryWithRises(
-                    Number(startingSalary),
+                    startingSalary,
                     Number(startingYear),
                     inflationRates,
                     validPayRises
@@ -129,7 +140,6 @@ export default function Calculator() {
                 setData(inflationRates);
                 setAdjustedSalary(salaryData);
                 setYears(yearsList);
-                setIsFormExpanded(false);
                 setLoading(false);
             })
             .catch(err => {
@@ -138,12 +148,18 @@ export default function Calculator() {
             });
     }
 
+    function reset() {
+        setData(null);
+        setAdjustedSalary(null);
+        setYears([]);
+    }
+
     if (loading) {
         return <p aria-busy="true">Loading</p>;
     }
 
-    const form = (<form className="container" onSubmit={handleSubmit}>
-        <fieldset>
+    const form = (<form onSubmit={handleSubmit}>
+        <fieldset className="panel main-fields">
             <label className="country-select">
                 Country
                 <select name="country" value={selectedCountry} onChange={changeCountry}>
@@ -179,42 +195,47 @@ export default function Calculator() {
             </label>
         </fieldset>
 
-        <details className="pay-rises">
-            <summary>Pay rises</summary>
-            <fieldset>
-                {payRises.map((rise, index) => (
-                    <div key={index} className="pay-rise-row">
-                        <label>
-                            Year
-                            <input
-                                type="number"
-                                value={rise.year}
-                                onChange={(e) => updatePayRise(index, 'year', e.target.value)}
-                                placeholder="Year"
-                            />
-                        </label>
-                        <label>
-                            New salary
-                            <input
-                                type="number"
-                                value={rise.salary}
-                                onChange={(e) => updatePayRise(index, 'salary', e.target.value)}
-                                placeholder="Salary"
-                            />
-                        </label>
-                        {payRises.length > 1 && (rise.year !== '' || rise.salary !== '') && (
-                            <button
-                                type="button"
-                                onClick={() => removePayRise(index)}
-                                aria-label="Remove pay rise"
-                            >×</button>
-                        )}
-                    </div>
-                ))}
-            </fieldset>
-        </details>
+        <div className="pay-rises-header">
+            Salary increases
+            <button className="text-btn" type="button" onClick={addPayRise}>
+                <Icon type="plus-circle"></Icon>
+                Add increase
+            </button>
+        </div>
+        <fieldset className="pay-rises panel">
+            {payRises.map((rise, index) => (
+                <div key={index} className="pay-rise-row">
+                    <label className="number-input">
+                        Year
+                        <input
+                            type="number"
+                            value={rise.year}
+                            onChange={(e) => updatePayRise(index, 'year', e.target.value)}
+                        />
+                    </label>
+                    <label className="number-input">
+                        New salary
+                        <input
+                            type="number"
+                            value={rise.salary}
+                            onChange={(e) => updatePayRise(index, 'salary', e.target.value)}
+                        />
+                    </label>
+                    <button
+                        type="button"
+                        onClick={() => removePayRise(index)}
+                        aria-label="Remove pay rise"
+                        className="text-btn delete-pay-rise"
+                    >
+                        <Icon type="trash"></Icon>
+                    </button>
+                </div>
+            ))}
+        </fieldset>
 
         <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear}>Calculate</button>
+
+        {/*<button onClick={() => reset()}>Reset</button>*/}
     </form>);
 
     let result;
@@ -241,41 +262,46 @@ export default function Calculator() {
             ]
         };
 
-        const currentValue = adjustedSalary.at(-1) ?? 0;
+        const currentSalary = adjustedSalary.at(-1) ?? 0;
+        const startingSalaryFormatted = currencyFormatter.format(startingSalary);
+        const currentSalaryFormatted = currencyFormatter.format(currentSalary);
         const currentYear = years.at(-1) ?? 0;
+        const percentageDiff = percentageFormmater.format(1 - (currentSalary / startingSalary));
 
-        result = <div className="container">
-            {data ? (
-                    <>
-                        <p>A starting salary of <span
-                            className="salary-highlight">{Number(startingSalary).toLocaleString()}</span> in {startingYear},
-                            is now worth <span
-                                className="value-highlight">{Math.round(currentValue).toLocaleString()}</span> in {currentYear}.
-                        </p>
-                        <Chart type="line" data={chartData} options={chartOptions}/>
-                    </>)
-                : ''}
+        const topPara = <p>A starting salary of
+            <span className="value-highlight salary-highlight">{startingSalaryFormatted}</span> in {startingYear},
+            {payRises[0].salary ? ' with pay rises, ' : ' '}
+            is now worth
+            <span className="value-highlight">{currentSalaryFormatted}</span> in {currentYear}.
+        </p>;
 
-            {!isFormExpanded && (
-                <div className="edit-btns">
-                    <button onClick={() => setIsFormExpanded(!isFormExpanded)}>
-                        {isFormExpanded ? 'Minimize' : 'Edit'}
-                    </button>
-                    <button onClick={() => {
-                        setData(null);
-                        setAdjustedSalary(null);
-                        setYears([]);
-                        setIsFormExpanded(true);
-                    }}>Reset
-                    </button>
-                </div>
-            )}
+        const para2 = currentSalary < startingSalary ?
+            <p className="warn">Your salary has failed to keep up with inflation, you
+                are {percentageDiff} poorer</p> : null;
+
+        result = <div className="result">
+            {topPara}
+            {para2}
+            <div >
+                <label className="toggle-switch">
+                    <input type="checkbox" checked={isRealValues} onChange={toggleRealValues}/>
+                    <span className="val1">Real values</span>
+                    <span className="val2">Nominal</span>
+                </label>
+            </div>
+
+            <Chart type="line" data={chartData} options={chartOptions}/>
         </div>
 
     }
 
-    return (<>
-        {isFormExpanded ? form : ''}
+    return <div className="calculator">
+        {form}
         {result}
-    </>);
+    </div>;
+}
+
+interface PayRiseInput {
+    year: string;
+    salary: string;
 }

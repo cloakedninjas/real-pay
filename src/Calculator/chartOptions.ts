@@ -4,7 +4,7 @@ export const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     plugins: {
         legend: {
-            position: 'top' as const,
+            position: 'top',
         },
         title: {
             display: true,
@@ -13,18 +13,18 @@ export const chartOptions: ChartOptions<'line'> = {
     },
     scales: {
         y: {
-            type: 'linear' as const,
+            type: 'linear',
             display: true,
-            position: 'left' as const,
+            position: 'left',
             title: {
                 display: true,
                 text: 'Salary',
             }
         },
         y1: {
-            type: 'linear' as const,
+            type: 'linear',
             display: true,
-            position: 'right' as const,
+            position: 'right',
             grid: {
                 drawOnChartArea: false,
             },

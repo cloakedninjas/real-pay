@@ -1,3 +1,4 @@
+// https://data360api.worldbank.org/data360/data?DATABASE_ID=WB_WDI&INDICATOR=WB_WDI_FP_CPI_TOTL_ZG&REF_AREA=FIN&timePeriodFrom=2010&timePeriodTo=2025&skip=0
 const API_ROOT = 'https://api.worldbank.org/v2';
 
 // Type definitions for World Bank API response
@@ -43,17 +44,6 @@ export async function getInflationData(countryCode: string, startYear: number): 
     }
 }
 
-export function calculateRealSalary(startingSalary: number, rates: number[]) {
-    let priceIndex = 1;
-
-    return rates.map((rate, i) => {
-        if (i > 0) {
-            priceIndex *= (1 + rate / 100)
-        }
-        return startingSalary / priceIndex;
-    });
-}
-
 export interface PayRise {
     year: number;
     salary: number;
@@ -63,7 +53,8 @@ export function calculateRealSalaryWithRises(
     startingSalary: number,
     startYear: number,
     rates: number[],
-    payRises: PayRise[]
+    payRises: PayRise[],
+    expressAsStarYear = true
 ) {
     let priceIndex = 1;
     let currentNominalSalary = startingSalary;
@@ -74,7 +65,10 @@ export function calculateRealSalaryWithRises(
 
         if (payRise) {
             currentNominalSalary = payRise.salary;
-            priceIndex = 1; // reset price index
+
+            if (!expressAsStarYear) {
+                priceIndex = 1; // reset price index
+            }
         } else if (i > 0) {
             priceIndex *= (1 + rate / 100);
         }

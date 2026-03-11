@@ -1,0 +1,154 @@
+@use "@picocss/pico/scss/pico" with (
+  $modules: (
+    "themes/default": false
+  ),
+  $enable-semantic-container: true,
+  $enable-classes: true
+);
+
+@import "vars";
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-bold);
+    color: var(--pico-background);
+}
+
+h1 {
+    --pico-font-size: 2rem;
+    --pico-line-height: 1.125;
+    --pico-typography-spacing-top: 3rem
+}
+
+h2 {
+    --pico-font-size: 1.75rem;
+    --pico-line-height: 1.15;
+    --pico-typography-spacing-top: 2.625rem
+}
+
+h3 {
+    --pico-font-size: 1.5rem;
+    --pico-line-height: 1.175;
+    --pico-typography-spacing-top: 2.25rem
+}
+
+h4 {
+    --pico-font-size: 1.25rem;
+    --pico-line-height: 1.2;
+    --pico-typography-spacing-top: 1.874rem
+}
+
+h5 {
+    --pico-font-size: 1.125rem;
+    --pico-line-height: 1.225;
+    --pico-typography-spacing-top: 1.6875rem
+}
+
+h6 {
+    --pico-font-size: 1rem;
+    --pico-line-height: 1.25;
+    --pico-typography-spacing-top: 1.5rem
+}
+
+label {
+    color: var(--pico-muted-color);
+}
+
+.panel {
+    padding: var(--pico-spacing);
+    background: var(--panel-bg-color);
+}
+
+.text-btn {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font-weight: var(--font-weight-bold);
+    color: inherit;
+    cursor: pointer;
+    box-shadow: none;
+
+    &:hover,
+    &:focus {
+        background: none;
+        border: none;
+        box-shadow: none;
+        opacity: 0.8;
+    }
+
+    .icon {
+        margin-right: calc(var(--pico-font-size) * 0.5);
+    }
+}
+
+button[type="submit"] {
+    background-color: var(--pico-secondary);
+
+    &:hover {
+        background-color: var(--pico-secondary-hover);
+    }
+}
+
+input, select, textarea {
+    border: 0;
+}
+
+label.toggle-switch:has([type=checkbox]) {
+    width: auto;
+}
+
+.toggle-switch {
+    --slider-padding: 0.3rem;
+
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: var(--slider-padding);
+    border-radius: var(--pico-border-radius);
+    background: var(--pico-secondary-background);
+    color: var(--pico-contrast);
+    user-select: none;
+
+    input[type="checkbox"] {
+        display: none;
+    }
+
+    span {
+        position: relative;
+        display: inline-flex;
+        justify-content: center;
+        z-index: 1;
+        transition: 0.2s;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: var(--slider-padding);
+        bottom: var(--slider-padding);
+        left: var(--slider-padding);
+        right: 50%;
+        background: var(--pico-secondary);
+        border-radius: 5px;
+        transition: 0.2s;
+    }
+
+    &:has(input:not(:checked)) {
+        .val1 {
+            color: var(--pico-primary-inverse);
+        }
+    }
+
+    &:has(input:checked) {
+        .val2 {
+            color: var(--pico-primary-inverse);
+        }
+
+        &::before {
+            left: 50%;
+            right: var(--slider-padding);
+        }
+    }
+}

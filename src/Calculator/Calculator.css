@@ -23,3 +23,22 @@ input[type=number]::-webkit-outer-spin-button {
     padding: 0.2rem 0.5rem;
     border-radius: var(--pico-border-radius);
 }
+
+.pay-rises fieldset {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.pay-rise-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.pay-rise-row button {
+    margin-top: 1.5rem;
+}
+
+button[type=submit] {
+    margin-top: 2rem;
+}

@@ -1,6 +1,6 @@
 import './Calculator.css'
 import * as React from 'react';
-import { calculateRealSalary, getInflationData } from './CalcService.ts';
+import { calculateRealSalaryWithRises, getInflationData, type PayRise as PayRiseType } from './CalcService.ts';
 import { Chart } from 'react-chartjs-2';
 import {
     CategoryScale,
@@ -27,7 +27,7 @@ ChartJS.register(
 const regionNames = new Intl.DisplayNames(navigator.languages, {type: 'region'});
 
 const iso2Countries = [
-    'US', 'GB', 'DE', 'FR', 'JP', 'CN', 'IN', 'BR', 'ZA', 'AU'
+    'US', 'GB', 'DE', 'FR', 'FI', 'JP', 'CN', 'IN', 'BR', 'ZA', 'AU'
 ];
 
 let defaultCountry = 'US';
@@ -48,6 +48,11 @@ const countries = iso2Countries
     }))
     .filter(c => c.name);
 
+interface PayRiseInput {
+    year: string;
+    salary: string;
+}
+
 export default function Calculator() {
     const [loading, setLoading] = React.useState(false);
     const [data, setData] = React.useState<number[] | null>(null);
@@ -56,6 +61,7 @@ export default function Calculator() {
     const [selectedCountry, setSelectedCountry] = React.useState(defaultCountry);
     const [startingSalary, setStartingSalary] = React.useState('');
     const [startingYear, setStartingYear] = React.useState('');
+    const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{ year: '', salary: '' }]);
 
     const changeCountry: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
@@ -67,6 +73,24 @@ export default function Calculator() {
 
     const changeYear: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         setStartingYear(e.target.value);
+    }
+
+    const updatePayRise = (index: number, field: keyof PayRiseInput, value: string) => {
+        const newPayRises = [...payRises];
+        newPayRises[index][field] = value;
+        setPayRises(newPayRises);
+
+        // Add a new empty row if the last row has data
+        const lastRise = newPayRises[newPayRises.length - 1];
+        if (lastRise.year !== '' || lastRise.salary !== '') {
+            setPayRises([...newPayRises, { year: '', salary: '' }]);
+        }
+    }
+
+    const removePayRise = (index: number) => {
+        if (payRises.length > 1) {
+            setPayRises(payRises.filter((_, i) => i !== index));
+        }
     }
 
     function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -83,7 +107,21 @@ export default function Calculator() {
 
         getInflationData(selectedCountry, Number(startingYear))
             .then(inflationRates => {
-                const salaryData = calculateRealSalary(Number(startingSalary), inflationRates);
+                // filter out incomplete entries
+                const validPayRises: PayRiseType[] = payRises
+                    .filter(rise => rise.year !== '' && rise.salary !== '')
+                    .map(rise => ({
+                        year: Number(rise.year),
+                        salary: Number(rise.salary)
+                    }));
+
+                const salaryData: number[] = calculateRealSalaryWithRises(
+                    Number(startingSalary),
+                    Number(startingYear),
+                    inflationRates,
+                    validPayRises
+                );
+
                 const yearsList = inflationRates.map((_, i) => Number(startingYear) + i);
 
                 setData(inflationRates);
@@ -122,8 +160,8 @@ export default function Calculator() {
             ]
         };
 
-        const currentValue = adjustedSalary.at(-1);
-        const currentYear = years.at(-1);
+        const currentValue = adjustedSalary.at(-1) ?? 0;
+        const currentYear = years.at(-1) ?? 0;
 
         return (
             <div className="container">
@@ -177,6 +215,41 @@ export default function Calculator() {
                 />
             </label>
         </fieldset>
+
+        <details className="pay-rises">
+            <summary>Pay rises</summary>
+            <fieldset>
+                {payRises.map((rise, index) => (
+                    <div key={index} className="pay-rise-row">
+                        <label>
+                            Year
+                            <input
+                                type="number"
+                                value={rise.year}
+                                onChange={(e) => updatePayRise(index, 'year', e.target.value)}
+                                placeholder="Year"
+                            />
+                        </label>
+                        <label>
+                            New salary
+                            <input
+                                type="number"
+                                value={rise.salary}
+                                onChange={(e) => updatePayRise(index, 'salary', e.target.value)}
+                                placeholder="Salary"
+                            />
+                        </label>
+                        {payRises.length > 1 && (rise.year !== '' || rise.salary !== '') && (
+                            <button
+                                type="button"
+                                onClick={() => removePayRise(index)}
+                                aria-label="Remove pay rise"
+                            >×</button>
+                        )}
+                    </div>
+                ))}
+            </fieldset>
+        </details>
 
         <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear}>Calculate</button>
     </form>

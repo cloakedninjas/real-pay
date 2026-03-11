@@ -53,3 +53,32 @@ export function calculateRealSalary(startingSalary: number, rates: number[]) {
         return startingSalary / priceIndex;
     });
 }
+
+export interface PayRise {
+    year: number;
+    salary: number;
+}
+
+export function calculateRealSalaryWithRises(
+    startingSalary: number,
+    startYear: number,
+    rates: number[],
+    payRises: PayRise[]
+) {
+    let priceIndex = 1;
+    let currentNominalSalary = startingSalary;
+
+    return rates.map((rate, i) => {
+        const currentYear = startYear + i;
+        const payRise = payRises.find(rise => rise.year === currentYear);
+
+        if (payRise) {
+            currentNominalSalary = payRise.salary;
+            priceIndex = 1; // reset price index
+        } else if (i > 0) {
+            priceIndex *= (1 + rate / 100);
+        }
+
+        return currentNominalSalary / priceIndex;
+    });
+}

@@ -5,13 +5,13 @@ import { Chart } from 'react-chartjs-2';
 import {
     CategoryScale,
     Chart as ChartJS,
+    type ChartData,
     Legend,
     LinearScale,
     LineElement,
     PointElement,
     Title,
-    Tooltip,
-    type ChartData
+    Tooltip
 } from 'chart.js';
 import { chartOptions } from './chartOptions.ts';
 
@@ -62,7 +62,7 @@ export default function Calculator() {
     const [selectedCountry, setSelectedCountry] = React.useState(defaultCountry);
     const [startingSalary, setStartingSalary] = React.useState('');
     const [startingYear, setStartingYear] = React.useState('');
-    const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{ year: '', salary: '' }]);
+    const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{year: '', salary: ''}]);
     const [isFormExpanded, setIsFormExpanded] = React.useState(true);
 
     const changeCountry: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
@@ -85,7 +85,7 @@ export default function Calculator() {
         // Add a new empty row if the last row has data
         const lastRise = newPayRises[newPayRises.length - 1];
         if (lastRise.year !== '' || lastRise.salary !== '') {
-            setPayRises([...newPayRises, { year: '', salary: '' }]);
+            setPayRises([...newPayRises, {year: '', salary: ''}]);
         }
     }
 
@@ -139,141 +139,12 @@ export default function Calculator() {
     }
 
     if (loading) {
-        return <p>Loading...</p>;
+        return <p aria-busy="true">Loading</p>;
     }
 
-    if (data && adjustedSalary && years.length > 0) {
-        const chartData: ChartData<'line'> = {
-            labels: years,
-            datasets: [
-                {
-                    label: 'Inflation',
-                    yAxisID: 'y1',
-                    data: data,
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                    hidden: true
-                },
-                {
-                    label: 'Salary',
-                    yAxisID: 'y',
-                    data: adjustedSalary,
-                    borderColor: 'rgb(53, 162, 235)',
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                }
-            ]
-        };
-
-        const currentValue = adjustedSalary.at(-1) ?? 0;
-        const currentYear = years.at(-1) ?? 0;
-
-        return (
-            <div className="container">
-                <form onSubmit={handleSubmit}>
-                    {isFormExpanded ? (
-                        <>
-                            <fieldset>
-                                <label>
-                                    Country
-                                    <select name="country" value={selectedCountry} onChange={changeCountry}>
-                                        {
-                                            countries.map(country => {
-                                                return <option
-                                                    key={country.code}
-                                                    value={country.code}
-                                                >{country.name}</option>
-                                            })
-                                        }
-                                    </select>
-                                </label>
-                                <label>
-                                    Starting salary
-                                    <input
-                                        type="number"
-                                        name="baseSalary"
-                                        autoComplete=""
-                                        value={startingSalary}
-                                        onChange={changeSalary}
-                                    />
-                                </label>
-                                <label>
-                                    Starting year
-                                    <input
-                                        type="number"
-                                        name="startYear"
-                                        autoComplete=""
-                                        value={startingYear}
-                                        onChange={changeYear}
-                                    />
-                                </label>
-                            </fieldset>
-
-                            <details className="pay-rises">
-                                <summary>Pay rises</summary>
-                                <fieldset>
-                                    {payRises.map((rise, index) => (
-                                        <div key={index} className="pay-rise-row">
-                                            <label>
-                                                Year
-                                                <input
-                                                    type="number"
-                                                    value={rise.year}
-                                                    onChange={(e) => updatePayRise(index, 'year', e.target.value)}
-                                                    placeholder="Year"
-                                                />
-                                            </label>
-                                            <label>
-                                                New salary
-                                                <input
-                                                    type="number"
-                                                    value={rise.salary}
-                                                    onChange={(e) => updatePayRise(index, 'salary', e.target.value)}
-                                                    placeholder="Salary"
-                                                />
-                                            </label>
-                                            {payRises.length > 1 && (rise.year !== '' || rise.salary !== '') && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() => removePayRise(index)}
-                                                    aria-label="Remove pay rise"
-                                                >×</button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </fieldset>
-                            </details>
-
-                            <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear}>Calculate</button>
-                        </>
-                    ) : ''}
-                </form>
-
-                <p>
-                    A starting salary of <span className="salary-highlight">{Number(startingSalary).toLocaleString()}</span> in {startingYear},
-                    is now worth <span className="value-highlight">{Math.round(currentValue).toLocaleString()}</span> in {currentYear}.
-                </p>
-                <Chart type='line' data={chartData} options={chartOptions} />
-
-                {!isFormExpanded && (
-                    <div className="edit-btns">
-                        <button onClick={() => setIsFormExpanded(!isFormExpanded)}>
-                            {isFormExpanded ? 'Minimize' : 'Edit'}
-                        </button>
-                        <button onClick={() => {
-                            setData(null);
-                            setAdjustedSalary(null);
-                            setYears([]);
-                            setIsFormExpanded(true);
-                        }}>Reset</button>
-                    </div>
-                )}
-            </div>
-        );
-    }
-
-    return <form className="container" onSubmit={handleSubmit}>
+    const form = (<form className="container" onSubmit={handleSubmit}>
         <fieldset>
-            <label>
+            <label className="country-select">
                 Country
                 <select name="country" value={selectedCountry} onChange={changeCountry}>
                     {
@@ -286,7 +157,7 @@ export default function Calculator() {
                     }
                 </select>
             </label>
-            <label>
+            <label className="number-input">
                 Starting salary
                 <input
                     type="number"
@@ -296,7 +167,7 @@ export default function Calculator() {
                     onChange={changeSalary}
                 />
             </label>
-            <label>
+            <label className="number-input">
                 Starting year
                 <input
                     type="number"
@@ -344,5 +215,67 @@ export default function Calculator() {
         </details>
 
         <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear}>Calculate</button>
-    </form>
+    </form>);
+
+    let result;
+
+    if (data && adjustedSalary && years.length > 0) {
+        const chartData: ChartData<'line'> = {
+            labels: years,
+            datasets: [
+                {
+                    label: 'Inflation',
+                    yAxisID: 'y1',
+                    data: data,
+                    borderColor: 'rgb(255, 99, 132)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    hidden: true
+                },
+                {
+                    label: 'Salary',
+                    yAxisID: 'y',
+                    data: adjustedSalary,
+                    borderColor: 'rgb(53, 162, 235)',
+                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                }
+            ]
+        };
+
+        const currentValue = adjustedSalary.at(-1) ?? 0;
+        const currentYear = years.at(-1) ?? 0;
+
+        result = <div className="container">
+            {data ? (
+                    <>
+                        <p>A starting salary of <span
+                            className="salary-highlight">{Number(startingSalary).toLocaleString()}</span> in {startingYear},
+                            is now worth <span
+                                className="value-highlight">{Math.round(currentValue).toLocaleString()}</span> in {currentYear}.
+                        </p>
+                        <Chart type="line" data={chartData} options={chartOptions}/>
+                    </>)
+                : ''}
+
+            {!isFormExpanded && (
+                <div className="edit-btns">
+                    <button onClick={() => setIsFormExpanded(!isFormExpanded)}>
+                        {isFormExpanded ? 'Minimize' : 'Edit'}
+                    </button>
+                    <button onClick={() => {
+                        setData(null);
+                        setAdjustedSalary(null);
+                        setYears([]);
+                        setIsFormExpanded(true);
+                    }}>Reset
+                    </button>
+                </div>
+            )}
+        </div>
+
+    }
+
+    return (<>
+        {isFormExpanded ? form : ''}
+        {result}
+    </>);
 }

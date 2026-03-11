@@ -16,6 +16,10 @@ export const chartOptions: ChartOptions<'line'> = {
             type: 'linear' as const,
             display: true,
             position: 'left' as const,
+            title: {
+                display: true,
+                text: 'Salary',
+            }
         },
         y1: {
             type: 'linear' as const,
@@ -24,6 +28,10 @@ export const chartOptions: ChartOptions<'line'> = {
             grid: {
                 drawOnChartArea: false,
             },
+            title: {
+                display: true,
+                text: 'Inflation (%)',
+            }
         },
     }
 };

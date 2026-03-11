@@ -1,0 +1,11 @@
+fieldset {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pico-spacing);
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

@@ -10,7 +10,8 @@ import {
     LineElement,
     PointElement,
     Title,
-    Tooltip
+    Tooltip,
+    type ChartData
 } from 'chart.js';
 import { chartOptions } from './chartOptions.ts';
 
@@ -62,6 +63,7 @@ export default function Calculator() {
     const [startingSalary, setStartingSalary] = React.useState('');
     const [startingYear, setStartingYear] = React.useState('');
     const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{ year: '', salary: '' }]);
+    const [isFormExpanded, setIsFormExpanded] = React.useState(true);
 
     const changeCountry: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
@@ -127,6 +129,7 @@ export default function Calculator() {
                 setData(inflationRates);
                 setAdjustedSalary(salaryData);
                 setYears(yearsList);
+                setIsFormExpanded(false);
                 setLoading(false);
             })
             .catch(err => {
@@ -140,7 +143,7 @@ export default function Calculator() {
     }
 
     if (data && adjustedSalary && years.length > 0) {
-        const chartData = {
+        const chartData: ChartData<'line'> = {
             labels: years,
             datasets: [
                 {
@@ -149,6 +152,7 @@ export default function Calculator() {
                     data: data,
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                    hidden: true
                 },
                 {
                     label: 'Salary',
@@ -165,16 +169,104 @@ export default function Calculator() {
 
         return (
             <div className="container">
+                <form onSubmit={handleSubmit}>
+                    {isFormExpanded ? (
+                        <>
+                            <fieldset>
+                                <label>
+                                    Country
+                                    <select name="country" value={selectedCountry} onChange={changeCountry}>
+                                        {
+                                            countries.map(country => {
+                                                return <option
+                                                    key={country.code}
+                                                    value={country.code}
+                                                >{country.name}</option>
+                                            })
+                                        }
+                                    </select>
+                                </label>
+                                <label>
+                                    Starting salary
+                                    <input
+                                        type="number"
+                                        name="baseSalary"
+                                        autoComplete=""
+                                        value={startingSalary}
+                                        onChange={changeSalary}
+                                    />
+                                </label>
+                                <label>
+                                    Starting year
+                                    <input
+                                        type="number"
+                                        name="startYear"
+                                        autoComplete=""
+                                        value={startingYear}
+                                        onChange={changeYear}
+                                    />
+                                </label>
+                            </fieldset>
+
+                            <details className="pay-rises">
+                                <summary>Pay rises</summary>
+                                <fieldset>
+                                    {payRises.map((rise, index) => (
+                                        <div key={index} className="pay-rise-row">
+                                            <label>
+                                                Year
+                                                <input
+                                                    type="number"
+                                                    value={rise.year}
+                                                    onChange={(e) => updatePayRise(index, 'year', e.target.value)}
+                                                    placeholder="Year"
+                                                />
+                                            </label>
+                                            <label>
+                                                New salary
+                                                <input
+                                                    type="number"
+                                                    value={rise.salary}
+                                                    onChange={(e) => updatePayRise(index, 'salary', e.target.value)}
+                                                    placeholder="Salary"
+                                                />
+                                            </label>
+                                            {payRises.length > 1 && (rise.year !== '' || rise.salary !== '') && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => removePayRise(index)}
+                                                    aria-label="Remove pay rise"
+                                                >×</button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </fieldset>
+                            </details>
+
+                            <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear}>Calculate</button>
+                        </>
+                    ) : ''}
+                </form>
+
                 <p>
                     A starting salary of <span className="salary-highlight">{Number(startingSalary).toLocaleString()}</span> in {startingYear},
                     is now worth <span className="value-highlight">{Math.round(currentValue).toLocaleString()}</span> in {currentYear}.
                 </p>
                 <Chart type='line' data={chartData} options={chartOptions} />
-                <button onClick={() => {
-                    setData(null);
-                    setAdjustedSalary(null);
-                    setYears([]);
-                }}>Reset</button>
+
+                {!isFormExpanded && (
+                    <div className="edit-btns">
+                        <button onClick={() => setIsFormExpanded(!isFormExpanded)}>
+                            {isFormExpanded ? 'Minimize' : 'Edit'}
+                        </button>
+                        <button onClick={() => {
+                            setData(null);
+                            setAdjustedSalary(null);
+                            setYears([]);
+                            setIsFormExpanded(true);
+                        }}>Reset</button>
+                    </div>
+                )}
             </div>
         );
     }

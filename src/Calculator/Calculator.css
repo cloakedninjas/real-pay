@@ -42,3 +42,9 @@ input[type=number]::-webkit-outer-spin-button {
 button[type=submit] {
     margin-top: 2rem;
 }
+
+.edit-btns {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 2rem;
+}

@@ -9,3 +9,17 @@ input[type=number]::-webkit-outer-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
+.salary-highlight {
+    font-weight: bold;
+    background-color: #e3f2fd;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--pico-border-radius);
+}
+
+.value-highlight {
+    font-weight: bold;
+    background-color: #fff3e0;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--pico-border-radius);
+}

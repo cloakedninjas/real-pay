@@ -17,43 +17,49 @@ import { chartOptions } from './chartOptions.ts';
 import { countryCodes, countryCurrency, defaultCountry } from './locales.ts';
 import { Icon } from '../Icon.tsx';
 
+const regionNames = new Intl.DisplayNames(navigator.languages, {type: 'region'});
+const percentageFormater = new Intl.NumberFormat(navigator.languages, {
+    style: 'percent',
+    maximumFractionDigits: 2
+})
+
+let defaultCountryCode = defaultCountry;
+
+navigator.languages.some(value => {
+    const matches = value.match(/\w+-(\w+)/);
+
+    if (matches?.[1]) {
+        defaultCountryCode = matches[1];
+        return true;
+    }
+});
+
+const countries = countryCodes
+    .map(code => ({
+        code,
+        name: regionNames.of(code),
+    }))
+    .filter(c => c.name);
+
+let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
+    style: 'currency',
+    currencyDisplay: 'narrowSymbol',
+    currency: countryCurrency[defaultCountryCode]
+});
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+);
+
 export default function Calculator() {
-    ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        Tooltip,
-        Legend
-    );
-
-    const regionNames = new Intl.DisplayNames(navigator.languages, {type: 'region'});
-    const percentageFormmater = new Intl.NumberFormat(navigator.languages, {
-        style: 'percent',
-        maximumFractionDigits: 2
-    })
-
-    let defaultCountryCode = defaultCountry;
-
-    navigator.languages.some(value => {
-        const matches = value.match(/\w+-(\w+)/);
-
-        if (matches?.[1]) {
-            defaultCountryCode = matches[1];
-            return true;
-        }
-    });
-
-    const countries = countryCodes
-        .map(code => ({
-            code,
-            name: regionNames.of(code),
-        }))
-        .filter(c => c.name);
-
     const [loading, setLoading] = useState(false);
-    const [data, setData] = useState<number[] | null>(null);
+    const [inflationRates, setInflationRates] = useState<number[]>([]);
     const [adjustedSalary, setAdjustedSalary] = useState<number[] | null>(null);
     const [years, setYears] = useState<number[]>([]);
     const [selectedCountry, setSelectedCountry] = useState(defaultCountryCode);
@@ -61,13 +67,6 @@ export default function Calculator() {
     const [startingYear, setStartingYear] = useState('');
     const [payRises, setPayRises] = useState<PayRiseInput[]>([{year: '', salary: ''}]);
     const [isRealValues, setIsRealValues] = useState(true);
-    const [inflationRates, setInflationRates] = useState<number[]>([]);
-
-    let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
-        style: 'currency',
-        currencyDisplay: 'narrowSymbol',
-        currency: countryCurrency[selectedCountry]
-    });
 
     const changeCountry: ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
@@ -75,7 +74,7 @@ export default function Calculator() {
         currencyFormatter = new Intl.NumberFormat(navigator.languages, {
             style: 'currency',
             currencyDisplay: 'narrowSymbol',
-            currency: countryCurrency[selectedCountry]
+            currency: countryCurrency[e.target.value]
         });
     }
 
@@ -93,7 +92,6 @@ export default function Calculator() {
 
     useEffect(() => {
         if (inflationRates.length > 0) {
-            console.log(inflationRates);
             const validPayRises: PayRiseType[] = payRises
                 .filter(rise => rise.year !== '' && rise.salary !== '')
                 .map(rise => ({
@@ -108,8 +106,6 @@ export default function Calculator() {
                 validPayRises,
                 isRealValues
             );
-
-            console.log(salaryData);
 
             setAdjustedSalary(salaryData);
         }
@@ -145,41 +141,22 @@ export default function Calculator() {
 
         getInflationData(selectedCountry, Number(startingYear))
             .then(rates => {
-                // filter out incomplete entries
-                const validPayRises: PayRiseType[] = payRises
-                    .filter(rise => rise.year !== '' && rise.salary !== '')
-                    .map(rise => ({
-                        year: Number(rise.year),
-                        salary: Number(rise.salary)
-                    }));
-
-                const salaryData: number[] = calculateRealSalaryWithRises(
-                    startingSalary,
-                    Number(startingYear),
-                    rates,
-                    validPayRises,
-                    isRealValues
-                );
-
                 const yearsList = rates.map((_, i) => Number(startingYear) + i);
 
                 setInflationRates(rates);
-                setData(rates);
-                setAdjustedSalary(salaryData);
                 setYears(yearsList);
-                setLoading(false);
             })
             .catch(err => {
                 console.error(err);
-                setLoading(false);
-            });
+            })
+            .finally(() => setLoading(false));
     }
 
-    function reset() {
+    /*function reset() {
         setData(null);
         setAdjustedSalary(null);
         setYears([]);
-    }
+    }*/
 
     if (loading) {
         return <p aria-busy="true">Loading</p>;
@@ -205,7 +182,7 @@ export default function Calculator() {
                 <input
                     type="number"
                     name="baseSalary"
-                    autoComplete=""
+                    autoComplete="off"
                     value={startingSalary}
                     onChange={changeSalary}
                 />
@@ -215,7 +192,7 @@ export default function Calculator() {
                 <input
                     type="number"
                     name="startYear"
-                    autoComplete=""
+                    autoComplete="off"
                     value={startingYear}
                     onChange={changeYear}
                 />
@@ -267,14 +244,14 @@ export default function Calculator() {
 
     let result;
 
-    if (data && adjustedSalary && years.length > 0) {
+    if (inflationRates && adjustedSalary && years.length > 0) {
         const chartData: ChartData<'line'> = {
             labels: years,
             datasets: [
                 {
                     label: 'Inflation',
                     yAxisID: 'y1',
-                    data: data,
+                    data: inflationRates,
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                     hidden: true
@@ -293,7 +270,7 @@ export default function Calculator() {
         const startingSalaryFormatted = currencyFormatter.format(startingSalary);
         const currentSalaryFormatted = currencyFormatter.format(currentSalary);
         const currentYear = years.at(-1) ?? 0;
-        const percentageDiff = percentageFormmater.format(1 - (currentSalary / startingSalary));
+        const percentageDiff = percentageFormater.format(1 - (currentSalary / startingSalary));
 
         const topPara = <p>A starting salary of
             <span className="value-highlight salary-highlight">{startingSalaryFormatted}</span> in {startingYear},

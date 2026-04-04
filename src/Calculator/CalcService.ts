@@ -54,23 +54,28 @@ export function calculateRealSalaryWithRises(
     startYear: number,
     rates: number[],
     payRises: PayRise[],
-    expressAsStarYear = true
+    nominalPayRise = true
 ) {
     let priceIndex = 1;
     let currentNominalSalary = startingSalary;
 
     return rates.map((rate, i) => {
         const currentYear = startYear + i;
+
+        // Update price index first (before checking for pay rises)
+        if (i > 0) {
+            priceIndex *= (1 + rate / 100);
+        }
+
         const payRise = payRises.find(rise => rise.year === currentYear);
 
         if (payRise) {
             currentNominalSalary = payRise.salary;
 
-            if (!expressAsStarYear) {
-                priceIndex = 1; // reset price index
+            if (nominalPayRise) {
+                // reset price index so new salary is shown at its current-year value
+                priceIndex = 1;
             }
-        } else if (i > 0) {
-            priceIndex *= (1 + rate / 100);
         }
 
         return currentNominalSalary / priceIndex;

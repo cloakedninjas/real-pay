@@ -61,6 +61,7 @@ export default function Calculator() {
     const [startingYear, setStartingYear] = React.useState('');
     const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{year: '', salary: ''}]);
     const [isRealValues, setIsRealValues] = React.useState(true);
+    const [inflationRates, setInflationRates] = React.useState<number[]>([]);
 
     let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
         style: 'currency',
@@ -89,6 +90,30 @@ export default function Calculator() {
     const toggleRealValues: React.ChangeEventHandler<HTMLInputElement> = (e) => {
         setIsRealValues(e.target.checked);
     }
+
+    React.useEffect(() => {
+        if (inflationRates.length > 0) {
+            console.log(inflationRates);
+            const validPayRises: PayRiseType[] = payRises
+                .filter(rise => rise.year !== '' && rise.salary !== '')
+                .map(rise => ({
+                    year: Number(rise.year),
+                    salary: Number(rise.salary)
+                }));
+
+            const salaryData: number[] = calculateRealSalaryWithRises(
+                startingSalary,
+                Number(startingYear),
+                inflationRates,
+                validPayRises,
+                isRealValues
+            );
+
+            console.log(salaryData);
+
+            setAdjustedSalary(salaryData);
+        }
+    }, [isRealValues, inflationRates, startingSalary, startingYear, payRises]);
 
     const updatePayRise = (index: number, field: keyof PayRiseInput, value: string) => {
         const newPayRises = [...payRises];
@@ -119,7 +144,7 @@ export default function Calculator() {
         setLoading(true);
 
         getInflationData(selectedCountry, Number(startingYear))
-            .then(inflationRates => {
+            .then(rates => {
                 // filter out incomplete entries
                 const validPayRises: PayRiseType[] = payRises
                     .filter(rise => rise.year !== '' && rise.salary !== '')
@@ -131,13 +156,15 @@ export default function Calculator() {
                 const salaryData: number[] = calculateRealSalaryWithRises(
                     startingSalary,
                     Number(startingYear),
-                    inflationRates,
-                    validPayRises
+                    rates,
+                    validPayRises,
+                    isRealValues
                 );
 
-                const yearsList = inflationRates.map((_, i) => Number(startingYear) + i);
+                const yearsList = rates.map((_, i) => Number(startingYear) + i);
 
-                setData(inflationRates);
+                setInflationRates(rates);
+                setData(rates);
                 setAdjustedSalary(salaryData);
                 setYears(yearsList);
                 setLoading(false);
@@ -279,7 +306,7 @@ export default function Calculator() {
             <p className="warn">Your salary has failed to keep up with inflation, you
                 are {percentageDiff} poorer</p> : null;
 
-        result = <div className="result">
+        result = <>
             {topPara}
             {para2}
             <div >
@@ -290,14 +317,18 @@ export default function Calculator() {
                 </label>
             </div>
 
-            <Chart type="line" data={chartData} options={chartOptions}/>
-        </div>
+            <div className="chart-container">
+                <Chart type="line" data={chartData} options={chartOptions}/>
+            </div>
+        </>
 
     }
 
     return <div className="calculator">
         {form}
-        {result}
+        <div className="panel result">
+            {result}
+        </div>
     </div>;
 }
 

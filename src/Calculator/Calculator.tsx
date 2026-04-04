@@ -124,6 +124,8 @@ export default function Calculator() {
     const removePayRise = (index: number) => {
         if (payRises.length > 1) {
             setPayRises(payRises.filter((_, i) => i !== index));
+        } else {
+            setPayRises([{year: '', salary: ''}]);
         }
     }
 

@@ -8,6 +8,10 @@
 
 @import "vars";
 
+html {
+    background-color: var(--pico-background-color);
+}
+
 h1, h2, h3, h4, h5, h6 {
     font-weight: var(--font-weight-bold);
     color: var(--pico-background);
@@ -79,6 +83,10 @@ label {
         opacity: 0.8;
     }
 
+    &.icon-only .icon {
+        margin: 0;
+    }
+
     .icon {
         margin-right: calc(var(--pico-font-size) * 0.5);
     }
@@ -137,13 +145,13 @@ label.toggle-switch:has([type=checkbox]) {
     }
 
     &:has(input:not(:checked)) {
-        .val1 {
+        .false-value {
             color: var(--pico-primary-inverse);
         }
     }
 
     &:has(input:checked) {
-        .val2 {
+        .true-value {
             color: var(--pico-primary-inverse);
         }
 

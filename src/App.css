@@ -1,6 +1,5 @@
 .app > header {
     margin-bottom: calc(var(--pico-spacing) * 2);
-    background-color: var(--pico-background-color);
     color: var(--pico-primary);
     padding: var(--pico-spacing);
     font-size: calc(var(--pico-font-size) * 1.14);

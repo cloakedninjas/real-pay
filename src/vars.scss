@@ -3,7 +3,7 @@
 
   // Primary color (blue)
   --pico-primary: #0056c5;
-  --pico-primary-background: #e3f2ff;
+  --pico-primary-background: #c7e3ff;
   --pico-primary-border: rgba(0, 86, 197, 0.3);
   --pico-primary-hover: #0f6df3;
   --pico-primary-focus: rgba(0, 86, 197, 0.3);
@@ -11,7 +11,7 @@
 
   // Secondary color (mint green)
   --pico-secondary: #00a854;
-  --pico-secondary-background: #e6f9f0;
+  --pico-secondary-background: #c7f2dd;
   --pico-secondary-border: rgba(0, 168, 84, 0.3);
   --pico-secondary-hover: #00c862;
   --pico-secondary-focus: rgba(0, 168, 84, 0.3);
@@ -26,13 +26,13 @@
   --pico-contrast-inverse: #ffffff;
 
   // Base colors
-  --pico-background-color: #f8f9fa;
+  --pico-background-color: #eeeff0;
   --pico-color: #191c1d;
   --pico-muted-color: #757575;
   --pico-muted-border-color: #e1e3e4;
 
   // Text selection
-  --pico-text-selection-color: rgba(0, 86, 197, 0.2);
+  --pico-text-selection-color: var(--pico-primary-background);
 
   // ===== Typography =====
 
@@ -121,7 +121,7 @@
   --pico-card-sectioning-background-color: #f3f4f5;
 
   // Panel
-  --panel-bg-color: #f3f4f5;
+  --panel-bg-color: #f8f9fa;
 
   // Tables
   --pico-table-border-color: transparent;

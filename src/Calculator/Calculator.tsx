@@ -66,7 +66,7 @@ export default function Calculator() {
     const [startingSalary, setStartingSalary] = useState<number>('' as unknown as number);
     const [startingYear, setStartingYear] = useState('');
     const [payRises, setPayRises] = useState<PayRiseInput[]>([{year: '', salary: ''}]);
-    const [isRealValues, setIsRealValues] = useState(true);
+    const [showRealSalary, setShowRealSalary] = useState(true);
 
     const changeCountry: ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
@@ -87,7 +87,7 @@ export default function Calculator() {
     }
 
     const toggleRealValues: ChangeEventHandler<HTMLInputElement> = (e) => {
-        setIsRealValues(e.target.checked);
+        setShowRealSalary(e.target.checked);
     }
 
     useEffect(() => {
@@ -104,12 +104,12 @@ export default function Calculator() {
                 Number(startingYear),
                 inflationRates,
                 validPayRises,
-                isRealValues
+                showRealSalary
             );
 
             setAdjustedSalary(salaryData);
         }
-    }, [isRealValues, inflationRates, startingSalary, startingYear, payRises]);
+    }, [showRealSalary, inflationRates, startingSalary, startingYear, payRises]);
 
     const updatePayRise = (index: number, field: keyof PayRiseInput, value: string) => {
         const newPayRises = [...payRises];
@@ -177,16 +177,7 @@ export default function Calculator() {
                     }
                 </select>
             </label>
-            <label className="number-input">
-                Starting salary
-                <input
-                    type="number"
-                    name="baseSalary"
-                    autoComplete="off"
-                    value={startingSalary}
-                    onChange={changeSalary}
-                />
-            </label>
+
             <label className="number-input">
                 Starting year
                 <input
@@ -195,6 +186,17 @@ export default function Calculator() {
                     autoComplete="off"
                     value={startingYear}
                     onChange={changeYear}
+                />
+            </label>
+
+            <label className="number-input">
+                Starting salary
+                <input
+                    type="number"
+                    name="baseSalary"
+                    autoComplete="off"
+                    value={startingSalary}
+                    onChange={changeSalary}
                 />
             </label>
         </fieldset>
@@ -229,7 +231,7 @@ export default function Calculator() {
                         type="button"
                         onClick={() => removePayRise(index)}
                         aria-label="Remove pay rise"
-                        className="text-btn delete-pay-rise"
+                        className="text-btn delete-pay-rise icon-only"
                     >
                         <Icon type="trash"></Icon>
                     </button>
@@ -249,19 +251,19 @@ export default function Calculator() {
             labels: years,
             datasets: [
                 {
+                    label: 'Salary',
+                    yAxisID: 'y',
+                    data: adjustedSalary,
+                    borderColor: '#00a854',
+                    backgroundColor: '#00a854',
+                },
+                {
                     label: 'Inflation',
                     yAxisID: 'y1',
                     data: inflationRates,
                     borderColor: 'rgb(255, 99, 132)',
                     backgroundColor: 'rgba(255, 99, 132, 0.5)',
                     hidden: true
-                },
-                {
-                    label: 'Salary',
-                    yAxisID: 'y',
-                    data: adjustedSalary,
-                    borderColor: 'rgb(53, 162, 235)',
-                    backgroundColor: 'rgba(53, 162, 235, 0.5)',
                 }
             ]
         };
@@ -271,6 +273,7 @@ export default function Calculator() {
         const currentSalaryFormatted = currencyFormatter.format(currentSalary);
         const currentYear = years.at(-1) ?? 0;
         const percentageDiff = percentageFormater.format(1 - (currentSalary / startingSalary));
+        const hasPayRises = payRises.length > 1 || payRises[0].salary && payRises[0].year;
 
         const topPara = <p>A starting salary of
             <span className="value-highlight salary-highlight">{startingSalaryFormatted}</span> in {startingYear},
@@ -279,20 +282,20 @@ export default function Calculator() {
             <span className="value-highlight">{currentSalaryFormatted}</span> in {currentYear}.
         </p>;
 
-        const para2 = currentSalary < startingSalary ?
+        const lostSalaryWarning = hasPayRises && currentSalary < startingSalary ?
             <p className="warn">Your salary has failed to keep up with inflation, you
                 are {percentageDiff} poorer</p> : null;
 
+        const realNominalToggle = hasPayRises ? <label className="toggle-switch">
+                <input type="checkbox" checked={showRealSalary} onChange={toggleRealValues}/>
+                <span className="false-value">Nominal</span>
+                <span className="true-value">Real values</span>
+            </label> : null;
+
         result = <>
             {topPara}
-            {para2}
-            <div >
-                <label className="toggle-switch">
-                    <input type="checkbox" checked={isRealValues} onChange={toggleRealValues}/>
-                    <span className="val1">Real values</span>
-                    <span className="val2">Nominal</span>
-                </label>
-            </div>
+            {lostSalaryWarning}
+            {realNominalToggle}
 
             <div className="chart-container">
                 <Chart type="line" data={chartData} options={chartOptions}/>

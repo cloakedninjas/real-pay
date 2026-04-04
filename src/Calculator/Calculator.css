@@ -39,7 +39,7 @@ fieldset {
 .pay-rises-header {
     display: flex;
     justify-content: space-between;
-    margin: var(--pico-spacing) 0;
+    margin: 2rem 1rem 1rem;
 
     button {
         color: var(--pico-secondary);
@@ -107,4 +107,5 @@ button[type=submit] {
 
 .chart-container {
     position: relative;
+    margin-top: var(--pico-spacing);
 }

@@ -54,7 +54,7 @@ export function calculateRealSalaryWithRises(
     startYear: number,
     rates: number[],
     payRises: PayRise[],
-    nominalPayRise = true
+    expressAsRealValue = true
 ) {
     let priceIndex = 1;
     let currentNominalSalary = startingSalary;
@@ -72,7 +72,7 @@ export function calculateRealSalaryWithRises(
         if (payRise) {
             currentNominalSalary = payRise.salary;
 
-            if (nominalPayRise) {
+            if (!expressAsRealValue) {
                 // reset price index so new salary is shown at its current-year value
                 priceIndex = 1;
             }

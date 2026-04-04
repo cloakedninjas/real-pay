@@ -5,10 +5,6 @@ export const chartOptions: ChartOptions<'line'> = {
     plugins: {
         legend: {
             position: 'top',
-        },
-        title: {
-            display: true,
-            text: 'Real salary over time'
         }
     },
     scales: {

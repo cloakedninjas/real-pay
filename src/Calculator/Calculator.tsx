@@ -1,5 +1,5 @@
 import './Calculator.css'
-import * as React from 'react';
+import { useEffect, useState, type ChangeEventHandler, type SubmitEvent } from 'react';
 import { calculateRealSalaryWithRises, getInflationData, type PayRise as PayRiseType } from './CalcService.ts';
 import { Chart } from 'react-chartjs-2';
 import {
@@ -52,16 +52,16 @@ export default function Calculator() {
         }))
         .filter(c => c.name);
 
-    const [loading, setLoading] = React.useState(false);
-    const [data, setData] = React.useState<number[] | null>(null);
-    const [adjustedSalary, setAdjustedSalary] = React.useState<number[] | null>(null);
-    const [years, setYears] = React.useState<number[]>([]);
-    const [selectedCountry, setSelectedCountry] = React.useState(defaultCountryCode);
-    const [startingSalary, setStartingSalary] = React.useState<number>('' as unknown as number);
-    const [startingYear, setStartingYear] = React.useState('');
-    const [payRises, setPayRises] = React.useState<PayRiseInput[]>([{year: '', salary: ''}]);
-    const [isRealValues, setIsRealValues] = React.useState(true);
-    const [inflationRates, setInflationRates] = React.useState<number[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState<number[] | null>(null);
+    const [adjustedSalary, setAdjustedSalary] = useState<number[] | null>(null);
+    const [years, setYears] = useState<number[]>([]);
+    const [selectedCountry, setSelectedCountry] = useState(defaultCountryCode);
+    const [startingSalary, setStartingSalary] = useState<number>('' as unknown as number);
+    const [startingYear, setStartingYear] = useState('');
+    const [payRises, setPayRises] = useState<PayRiseInput[]>([{year: '', salary: ''}]);
+    const [isRealValues, setIsRealValues] = useState(true);
+    const [inflationRates, setInflationRates] = useState<number[]>([]);
 
     let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
         style: 'currency',
@@ -69,7 +69,7 @@ export default function Calculator() {
         currency: countryCurrency[selectedCountry]
     });
 
-    const changeCountry: React.ChangeEventHandler<HTMLSelectElement> = (e) => {
+    const changeCountry: ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
 
         currencyFormatter = new Intl.NumberFormat(navigator.languages, {
@@ -79,19 +79,19 @@ export default function Calculator() {
         });
     }
 
-    const changeSalary: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const changeSalary: ChangeEventHandler<HTMLInputElement> = (e) => {
         setStartingSalary(Number(e.target.value));
     }
 
-    const changeYear: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const changeYear: ChangeEventHandler<HTMLInputElement> = (e) => {
         setStartingYear(e.target.value);
     }
 
-    const toggleRealValues: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const toggleRealValues: ChangeEventHandler<HTMLInputElement> = (e) => {
         setIsRealValues(e.target.checked);
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (inflationRates.length > 0) {
             console.log(inflationRates);
             const validPayRises: PayRiseType[] = payRises
@@ -131,7 +131,7 @@ export default function Calculator() {
         }
     }
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
         e.preventDefault();
         fetchData();
     }

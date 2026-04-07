@@ -3,6 +3,12 @@
     flex-wrap: wrap;
     gap: var(--pico-spacing);
 
+    @media (max-width: 767px) {
+        form {
+            flex-basis: 100%;
+        }
+    }
+
     @media (min-width: 1280px) {
         flex-wrap: nowrap;
     }

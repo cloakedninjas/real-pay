@@ -24,4 +24,15 @@
     color: var(--pico-muted-color);
     font-size: calc(var(--pico-font-size) * 0.8);
 
+    .container {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
+}
+
+.github {
+    margin-left: auto;
+    font-size: 1.4rem;
+    color: var(--pico-contrast);
 }

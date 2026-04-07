@@ -1,6 +1,8 @@
 :root {
   // ===== Colors =====
 
+  --delete-btn-color: #ff5757;
+
   // Primary color (blue)
   --pico-primary: #0056c5;
   --pico-primary-background: #c7e3ff;
@@ -220,14 +222,6 @@
     // Text selection
     --pico-text-selection-color: rgba(137, 172, 255, 0.3);
 
-    // ===== Typography =====
-
-    // Font families (Inter for body, Manrope for display)
-    --pico-font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-
-    // Typography spacing
-    --pico-typography-spacing-vertical: 1.5rem;
-
     // Heading colors
     --pico-h1-color: var(--pico-color);
     --pico-h2-color: var(--pico-color);
@@ -323,7 +317,5 @@
     // Tooltip
     --pico-tooltip-background-color: var(--pico-contrast);
     --pico-tooltip-color: var(--pico-contrast-inverse);
-
-    --delete-btn-color: #ff5757;
   }
 }

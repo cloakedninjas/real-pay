@@ -1,5 +1,6 @@
 import './App.css'
 import Calculator from './Calculator/Calculator.tsx';
+import { Icon } from './Icon.tsx';
 
 function App() {
     return (
@@ -15,7 +16,15 @@ function App() {
             </main>
             <footer className="footer">
                 <div className="container">
-                    Inflation data provided by <a href="https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG">The World Bank</a>
+                    Inflation data provided by
+                    <a href="https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG" target="_blank">The World Bank</a>
+                    <a href="https://github.com/cloakedninjas/real-pay"
+                       target="_blank"
+                       className="github"
+                       title="GitHub"
+                    >
+                        <Icon type="github"></Icon>
+                    </a>
                 </div>
             </footer>
         </div>

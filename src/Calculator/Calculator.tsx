@@ -58,7 +58,7 @@ ChartJS.register(
 );
 
 export default function Calculator() {
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [inflationRates, setInflationRates] = useState<number[]>([]);
     const [adjustedSalary, setAdjustedSalary] = useState<number[] | null>(null);
     const [years, setYears] = useState<number[]>([]);
@@ -135,11 +135,11 @@ export default function Calculator() {
     }
 
     function fetchData() {
-        if (loading) {
+        if (isLoading) {
             return;
         }
 
-        setLoading(true);
+        setIsLoading(true);
 
         getInflationData(selectedCountry, Number(startingYear))
             .then(rates => {
@@ -151,7 +151,7 @@ export default function Calculator() {
             .catch(err => {
                 console.error(err);
             })
-            .finally(() => setLoading(false));
+            .finally(() => setIsLoading(false));
     }
 
     /*function reset() {
@@ -159,10 +159,6 @@ export default function Calculator() {
         setAdjustedSalary(null);
         setYears([]);
     }*/
-
-    if (loading) {
-        return <p aria-busy="true">Loading</p>;
-    }
 
     const form = (<form onSubmit={handleSubmit}>
         <fieldset className="panel main-fields">
@@ -309,7 +305,9 @@ export default function Calculator() {
     return <div className="calculator">
         {form}
         <div className="panel result">
-            {result}
+            {
+                isLoading ? <div className="loader"></div> : result
+            }
         </div>
     </div>;
 }

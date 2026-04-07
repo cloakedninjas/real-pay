@@ -1,4 +1,3 @@
-// https://data360api.worldbank.org/data360/data?DATABASE_ID=WB_WDI&INDICATOR=WB_WDI_FP_CPI_TOTL_ZG&REF_AREA=FIN&timePeriodFrom=2010&timePeriodTo=2025&skip=0
 const API_ROOT = 'https://api.worldbank.org/v2';
 
 // Type definitions for World Bank API response

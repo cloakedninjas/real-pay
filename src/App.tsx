@@ -13,6 +13,11 @@ function App() {
             <main className="container">
                 <Calculator/>
             </main>
+            <footer className="footer">
+                <div className="container">
+                    Inflation data provided by <a href="https://data.worldbank.org/indicator/FP.CPI.TOTL.ZG">The World Bank</a>
+                </div>
+            </footer>
         </div>
     )
 }

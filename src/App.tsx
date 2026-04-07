@@ -7,6 +7,7 @@ function App() {
             <header className="">
                 <div className="container">
                     <h1>Real Pay</h1>
+                    <p>See how inflation affects your salary over time</p>
                 </div>
             </header>
             <main className="container">

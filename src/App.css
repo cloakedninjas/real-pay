@@ -1,12 +1,11 @@
 .app > header {
-    margin-bottom: calc(var(--pico-spacing) * 2);
+    margin: 0 0 2rem;
     color: var(--pico-primary);
+    background: var(--panel-bg-color);
     padding: var(--pico-spacing);
     font-size: calc(var(--pico-font-size) * 1.14);
 
-    @media(max-width: 1023px) {
-        position: sticky;
-        top: 0;
-        border-bottom: var(--pico-border-width) solid transparent;
+    p {
+        margin-bottom: 0;
     }
 }

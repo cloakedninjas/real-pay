@@ -14,7 +14,7 @@ html {
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: var(--font-weight-bold);
-    color: var(--pico-background);
+    color: var(--pico-primary);
 }
 
 h1 {
@@ -173,7 +173,7 @@ label.toggle-switch:has([type=checkbox]) {
 .loader::after {
     content:"";
     grid-area: 1/1;
-    --c:no-repeat radial-gradient(farthest-side,#25b09b 92%,#0000);
+    --c:no-repeat radial-gradient(farthest-side, var(--pico-secondary) 92%,#0000);
     background:
             var(--c) 50%  0,
             var(--c) 50%  100%,
@@ -184,7 +184,7 @@ label.toggle-switch:has([type=checkbox]) {
 }
 .loader::before {
     margin: 4px;
-    filter: hue-rotate(45deg);
+    filter: hue-rotate(90deg);
     background-size: 8px 8px;
     animation-timing-function: linear
 }

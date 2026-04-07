@@ -1,5 +1,13 @@
 const API_ROOT = 'https://api.worldbank.org/v2';
 
+// Type definitions for country data
+export interface Country {
+    id: string;
+    iso2Code: string;
+    name: string;
+    currency: string;
+}
+
 // Type definitions for World Bank API response
 interface WorldBankMetadata {
     page: number;
@@ -28,6 +36,16 @@ interface IndicatorValue {
 }
 
 type WorldBankResponse = [WorldBankMetadata, IndicatorValue[]];
+
+export async function getCountries(): Promise<Country[]> {
+    try {
+        const response = await fetch('/countries.json');
+        return await response.json() as Country[];
+    } catch (error) {
+        console.error('Failed to fetch countries:', error);
+        return [];
+    }
+}
 
 export async function getInflationData(countryCode: string, startYear: number): Promise<number[]> {
     const endYear = (new Date()).getFullYear();

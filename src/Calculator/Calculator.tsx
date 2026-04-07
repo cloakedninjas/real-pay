@@ -1,6 +1,6 @@
 import './Calculator.css'
 import { useEffect, useState, type ChangeEventHandler, type SubmitEvent } from 'react';
-import { calculateRealSalaryWithRises, getInflationData, type PayRise as PayRiseType } from './CalcService.ts';
+import { calculateRealSalaryWithRises, getCountries, getInflationData, type Country, type PayRise as PayRiseType } from './CalcService.ts';
 import { Chart } from 'react-chartjs-2';
 import {
     CategoryScale,
@@ -14,10 +14,9 @@ import {
     Tooltip
 } from 'chart.js';
 import { chartOptions } from './chartOptions.ts';
-import { countryCodes, countryCurrency, defaultCountry } from './locales.ts';
 import { Icon } from '../Icon.tsx';
 
-const regionNames = new Intl.DisplayNames(navigator.languages, {type: 'region'});
+const defaultCountry = 'US';
 const percentageFormater = new Intl.NumberFormat(navigator.languages, {
     style: 'percent',
     maximumFractionDigits: 2
@@ -34,17 +33,10 @@ navigator.languages.some(value => {
     }
 });
 
-const countries = countryCodes
-    .map(code => ({
-        code,
-        name: regionNames.of(code),
-    }))
-    .filter(c => c.name);
-
 let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
     style: 'currency',
     currencyDisplay: 'narrowSymbol',
-    currency: countryCurrency[defaultCountryCode]
+    currency: 'USD'
 });
 
 ChartJS.register(
@@ -62,19 +54,29 @@ export default function Calculator() {
     const [inflationRates, setInflationRates] = useState<number[]>([]);
     const [adjustedSalary, setAdjustedSalary] = useState<number[] | null>(null);
     const [years, setYears] = useState<number[]>([]);
+    const [countries, setCountries] = useState<Country[]>([]);
     const [selectedCountry, setSelectedCountry] = useState(defaultCountryCode);
     const [startingSalary, setStartingSalary] = useState<number>('' as unknown as number);
     const [startingYear, setStartingYear] = useState('');
     const [payRises, setPayRises] = useState<PayRiseInput[]>([{year: '', salary: ''}]);
     const [showRealSalary, setShowRealSalary] = useState(true);
 
+    useEffect(() => {
+        getCountries()
+            .then(setCountries)
+            .catch(console.error);
+    }, []);
+
     const changeCountry: ChangeEventHandler<HTMLSelectElement> = (e) => {
         setSelectedCountry(e.target.value);
+
+        const country = countries.find(c => c.iso2Code === e.target.value);
+        const currency = country?.currency ?? 'USD';
 
         currencyFormatter = new Intl.NumberFormat(navigator.languages, {
             style: 'currency',
             currencyDisplay: 'narrowSymbol',
-            currency: countryCurrency[e.target.value]
+            currency: currency
         });
     }
 
@@ -168,8 +170,8 @@ export default function Calculator() {
                     {
                         countries.map(country => {
                             return <option
-                                key={country.code}
-                                value={country.code}
+                                key={country.iso2Code}
+                                value={country.iso2Code}
                             >{country.name}</option>
                         })
                     }

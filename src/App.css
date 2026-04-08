@@ -2,7 +2,7 @@
     display: grid;
     grid-template-rows: auto 1fr 50px;
     gap: 1rem;
-    min-height: 100vh;
+    min-height: 100dvh;
 }
 
 .app > header {

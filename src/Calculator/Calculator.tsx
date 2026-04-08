@@ -1,6 +1,12 @@
 import './Calculator.css'
-import { useEffect, useState, type ChangeEventHandler, type SubmitEvent } from 'react';
-import { calculateRealSalaryWithRises, getCountries, getInflationData, type Country, type PayRise as PayRiseType } from './CalcService.ts';
+import { type ChangeEventHandler, type SubmitEvent, useEffect, useState } from 'react';
+import {
+    calculateRealSalaryWithRises,
+    type Country,
+    getCountries,
+    getInflationData,
+    type PayRise as PayRiseType
+} from './CalcService.ts';
 import { Chart } from 'react-chartjs-2';
 import {
     CategoryScale,
@@ -8,6 +14,7 @@ import {
     type ChartData,
     Legend,
     LinearScale,
+    LineController,
     LineElement,
     PointElement,
     Title,
@@ -51,6 +58,7 @@ ChartJS.register(
     LinearScale,
     PointElement,
     LineElement,
+    LineController,
     Title,
     Tooltip,
     Legend

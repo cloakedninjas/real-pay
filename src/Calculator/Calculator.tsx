@@ -16,6 +16,7 @@ import {
 import { chartOptions } from './chartOptions.ts';
 import { Icon } from '../Icon.tsx';
 
+const LS_PREF_COUNTRY_KEY = 'rp-preferred-country';
 const defaultCountry = 'US';
 const percentageFormater = new Intl.NumberFormat(navigator.languages, {
     style: 'percent',
@@ -24,14 +25,20 @@ const percentageFormater = new Intl.NumberFormat(navigator.languages, {
 
 let defaultCountryCode = defaultCountry;
 
-navigator.languages.some(value => {
-    const matches = value.match(/\w+-(\w+)/);
+// Check localStorage first for preferred country
+const storedCountry = localStorage.getItem(LS_PREF_COUNTRY_KEY);
+if (storedCountry) {
+    defaultCountryCode = storedCountry;
+} else {
+    navigator.languages.some(value => {
+        const matches = value.match(/\w+-(\w+)/);
 
-    if (matches?.[1]) {
-        defaultCountryCode = matches[1];
-        return true;
-    }
-});
+        if (matches?.[1]) {
+            defaultCountryCode = matches[1];
+            return true;
+        }
+    });
+}
 
 let currencyFormatter = new Intl.NumberFormat(navigator.languages, {
     style: 'currency',
@@ -68,9 +75,12 @@ export default function Calculator() {
     }, []);
 
     const changeCountry: ChangeEventHandler<HTMLSelectElement> = (e) => {
-        setSelectedCountry(e.target.value);
+        const countryCode = e.target.value;
+        setSelectedCountry(countryCode);
 
-        const country = countries.find(c => c.iso2Code === e.target.value);
+        localStorage.setItem(LS_PREF_COUNTRY_KEY, countryCode);
+
+        const country = countries.find(c => c.iso2Code === countryCode);
         const currency = country?.currency ?? 'USD';
 
         currencyFormatter = new Intl.NumberFormat(navigator.languages, {

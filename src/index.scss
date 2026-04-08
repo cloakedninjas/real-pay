@@ -6,7 +6,7 @@
   $enable-classes: true
 );
 
-@import "vars";
+@use "vars";
 
 html {
     background-color: var(--pico-background-color);

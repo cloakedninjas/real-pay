@@ -14,7 +14,8 @@ describe('CalcService', () => {
                 startingSalary,
                 startYear,
                 inflationRates,
-                payRises
+                payRises,
+                false
             );
 
             expect(result).toHaveLength(5);
@@ -38,7 +39,8 @@ describe('CalcService', () => {
                 startingSalary,
                 startYear,
                 inflationRates,
-                payRises
+                payRises,
+                false
             );
 
             expect(result).toHaveLength(6);
@@ -64,7 +66,7 @@ describe('CalcService', () => {
                 startYear,
                 inflationRates,
                 payRises,
-                false
+                true
             );
 
             expect(result).toHaveLength(6);

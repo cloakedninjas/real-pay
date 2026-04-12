@@ -31,6 +31,12 @@ form {
     .loader {
         flex-basis: 50px;
     }
+
+    &:empty {
+        @media (max-width: 767px) {
+            display: none;
+        }
+    }
 }
 
 .main-fields {

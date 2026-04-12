@@ -71,7 +71,7 @@ export default function Calculator() {
     const [years, setYears] = useState<number[]>([]);
     const [countries, setCountries] = useState<Country[]>([]);
     const [selectedCountry, setSelectedCountry] = useState(defaultCountryCode);
-    const [startingSalary, setStartingSalary] = useState<number>('' as unknown as number);
+    const [startingSalary, setStartingSalary] = useState('');
     const [startingYear, setStartingYear] = useState('');
     const [payRises, setPayRises] = useState<PayRiseInput[]>([{year: '', salary: ''}]);
     const [showRealSalary, setShowRealSalary] = useState(true);
@@ -99,7 +99,7 @@ export default function Calculator() {
     }
 
     const changeSalary: ChangeEventHandler<HTMLInputElement> = (e) => {
-        setStartingSalary(Number(e.target.value));
+        setStartingSalary(e.target.value);
     }
 
     const changeYear: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -120,7 +120,7 @@ export default function Calculator() {
                 }));
 
             const salaryData: number[] = calculateRealSalaryWithRises(
-                startingSalary,
+                Number(startingSalary),
                 Number(startingYear),
                 inflationRates,
                 validPayRises,
@@ -257,7 +257,7 @@ export default function Calculator() {
             ))}
         </fieldset>
 
-        <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear}>Calculate</button>
+        <button type="submit" disabled={!selectedCountry || !startingSalary || !startingYear }>Calculate</button>
 
         {/*<button onClick={() => reset()}>Reset</button>*/}
     </form>);
@@ -287,10 +287,10 @@ export default function Calculator() {
         };
 
         const currentSalary = adjustedSalary.at(-1) ?? 0;
-        const startingSalaryFormatted = currencyFormatter.format(startingSalary);
+        const startingSalaryFormatted = currencyFormatter.format(Number(startingSalary));
         const currentSalaryFormatted = currencyFormatter.format(currentSalary);
         const currentYear = years.at(-1) ?? 0;
-        const percentageDiff = percentageFormater.format(1 - (currentSalary / startingSalary));
+        const percentageDiff = percentageFormater.format(1 - (currentSalary / Number(startingSalary)));
         const hasPayRises = payRises.length > 1 || payRises[0].salary && payRises[0].year;
 
         const topPara = <p>A starting salary of
@@ -300,7 +300,7 @@ export default function Calculator() {
             <span className="value-highlight">{currentSalaryFormatted}</span> in {currentYear}.
         </p>;
 
-        const lostSalaryWarning = hasPayRises && currentSalary < startingSalary ?
+        const lostSalaryWarning = hasPayRises && Number(currentSalary) < Number(startingSalary) ?
             <p className="warn">Your salary has failed to keep up with inflation, you
                 are {percentageDiff} poorer</p> : null;
 
